@@ -471,43 +471,33 @@ class OverDetailView(GenericViewSet,CreateModelMixin,ListModelMixin,RetrieveMode
                 "error_message": str(e)
             }
             return Response(response_data)
-class AttendanceView(GenericViewSet,CreateModelMixin,ListModelMixin,RetrieveModelMixin):
+class AttendanceView(GenericViewSet,CreateModelMixin,RetrieveModelMixin,UpdateModelMixin):
     queryset=Attendance.objects.all()
     serializer_class=AttendanceSerializer
     # authentication_classes=[authentication.TokenAuthentication]
     # permission_classes=[permissions.IsAuthenticated]
     http_method_names=["get","post"]
-    
-    
-    def list(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         try:
-            attendance_records = self.get_queryset()
-            total_results = attendance_records.count()
-
-            if total_results == 0:
-                
-                response_data = {
-                    "status": "error",
-                    "error_message": "No attendance records found.",
-                    "totalResults": total_results
-                }
-            else:
-                
-                serialized_attendance = self.serializer_class(attendance_records, many=True)
-                response_data = {
-                    "status": "ok",
-                    "data": serialized_attendance.data,
-                    "totalResults": total_results
-                }
+            partial = kwargs.pop('partial', False)
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            response_data = {
+                "status": "ok",
+                "data": serializer.data
+            }
+            return Response(response_data)
         except Exception as e:
-            
             response_data = {
                 "status": "error",
-                "error_message": str(e),
-                "totalResults": total_results
+                "error_message": str(e)
             }
-        
-        return Response(response_data)
+            return Response(response_data)
+    
+    
+    
     def create(self, request, *args, **kwargs):
         try:
             serializer = self.get_serializer(data=request.data)
