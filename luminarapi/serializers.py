@@ -36,6 +36,7 @@ class BatchSerializer(serializers.ModelSerializer):
          fields="__all__"
 class OverviewSerializer(serializers.ModelSerializer):
     id=serializers.CharField(read_only=True)
+    # subjects = serializers.SerializerMethodField()
     class Meta:
          model=Overview
          fields="__all__"
